@@ -28,3 +28,12 @@ import WebSocket from 'ws'
    (https://www.npmjs.com/package/chokidar)
 
 6. `cac` Command And Conquer is a Javascript library for building CLI apps
+
+7. `es-module-lexer`
+类似与babel, 做词法分析，可以参考[Es-Module-Lexer，ES Module 语法的词法分析利器](https://blog.csdn.net/qq_42049445/article/details/115654324)的介绍
+
+8. `magic-string`
+对源代码做一些轻量的修改，并生成sourcemap,（我理解有点类似与babel的generate）
+
+9. `fast-glob`
+遍历文件系统， 返回符合格式的文件数组

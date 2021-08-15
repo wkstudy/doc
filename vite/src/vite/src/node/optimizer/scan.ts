@@ -21,7 +21,7 @@ import {
   createPluginContainer,
   PluginContainer
 } from '../server/pluginContainer'
-import { init, parse } from 'es-module-lexer'
+import { init, parse } from 'es-module-lexer' // WK 类似与babel，做词法分析的（https://blog.csdn.net/qq_42049445/article/details/115654324）
 import MagicString from 'magic-string'
 import { transformImportGlob } from '../importGlob'
 
@@ -65,7 +65,7 @@ export async function scanImports(config: ResolvedConfig): Promise<{
       throw new Error('invalid rollupOptions.input value.')
     }
   } else {
-    entries = await globEntries('**/*.html', config)
+    entries = await globEntries('**/*.html', config) // WK 默认取html为入口
   }
 
   // Non-supported entry file types and virtual files should not be scanned for
@@ -90,7 +90,7 @@ export async function scanImports(config: ResolvedConfig): Promise<{
 
   const { plugins = [], ...esbuildOptions } =
     config.optimizeDeps?.esbuildOptions ?? {}
-
+// WK 进行esbuild打包，通过esbuildScanPlugin插件分析得到deps missing
   await Promise.all(
     entries.map((entry) =>
       build({
@@ -113,6 +113,12 @@ export async function scanImports(config: ResolvedConfig): Promise<{
   }
 }
 
+/**
+ * // WK 返回config下符合pattern 格式文件的数组
+ * @param pattern 
+ * @param config 
+ * @returns 
+ */
 function globEntries(pattern: string | string[], config: ResolvedConfig) {
   return glob(pattern, {
     cwd: config.root,
@@ -126,12 +132,21 @@ function globEntries(pattern: string | string[], config: ResolvedConfig) {
 }
 
 const scriptModuleRE =
-  /(<script\b[^>]*type\s*=\s*(?:"module"|'module')[^>]*>)(.*?)<\/script>/gims
-export const scriptRE = /(<script\b(\s[^>]*>|>))(.*?)<\/script>/gims
+  /(<script\b[^>]*type\s*=\s*(?:"module"|'module')[^>]*>)(.*?)<\/script>/gims // WK type = module的script
+export const scriptRE = /(<script\b(\s[^>]*>|>))(.*?)<\/script>/gims // 普通的script
 export const commentRE = /<!--(.|[\r\n])*?-->/
 const srcRE = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s'">]+))/im
 const langRE = /\blang\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s'">]+))/im
 
+/**
+ * // WK 生成一个esbuild plugin
+ * @param config 
+ * @param container 
+ * @param depImports 
+ * @param missing 
+ * @param entries 
+ * @returns 
+ */
 function esbuildScanPlugin(
   config: ResolvedConfig,
   container: PluginContainer,
@@ -158,6 +173,7 @@ function esbuildScanPlugin(
   const include = config.optimizeDeps?.include
   const exclude = config.optimizeDeps?.exclude
 
+  // WK 非入口文件的话，external设置为true
   const externalUnlessEntry = ({ path }: { path: string }) => ({
     path,
     external: !entries.includes(path)
@@ -169,7 +185,7 @@ function esbuildScanPlugin(
       // external urls
       build.onResolve({ filter: externalRE }, ({ path }) => ({
         path,
-        external: true
+        external: true // WK external为true表示只有在run-time时才打包
       }))
 
       // data urls
@@ -186,6 +202,7 @@ function esbuildScanPlugin(
         }
       })
 
+      // WK 把html /vue / svelte 里的js相关的东西整理为一个js module（保存在js变量里）并返回
       // extract scripts inside HTML-like files and treat it as a js module
       build.onLoad(
         { filter: htmlTypesRE, namespace: 'html' },
@@ -200,8 +217,11 @@ function esbuildScanPlugin(
           let loader: Loader = 'js'
           let match
           while ((match = regex.exec(raw))) {
+            // WK openTag 是<script> 开始标签的所有内容
+            // WK htmlContent 在scriptModuleRE 是script标签里的内容，在scriptRE是<script   > 开始标签里除了script的内容
+            // WK scriptContent  在scriptModuleRE里没有这个，在scriptRE是script标签之间的内容
             const [, openTag, htmlContent, scriptContent] = match
-            const content = isHtml ? htmlContent : scriptContent
+            const content = isHtml ? htmlContent : scriptContent // WK content是<script></script>里的内容
             const srcMatch = openTag.match(srcRE)
             const langMatch = openTag.match(langRE)
             const lang =
@@ -210,19 +230,23 @@ function esbuildScanPlugin(
               loader = lang
             }
             if (srcMatch) {
+              // WK 一般是html会有src属性，这里把src的东西改为import 引入
               const src = srcMatch[1] || srcMatch[2] || srcMatch[3]
               js += `import ${JSON.stringify(src)}\n`
             } else if (content.trim()) {
+              // WK 这里是把script标签内部的js代码放到js变量里
               js += content + '\n'
             }
           }
 
+          // WK 顶级await支持的 处理(此时js里如果有await的话，并不在async里，所以会出问题)
           // <script setup> may contain TLA which is not true TLA but esbuild
           // will error on it, so replace it with another operator.
           if (js.includes('await')) {
             js = js.replace(/\bawait(\s)/g, 'void$1')
           }
 
+          // WK 特殊情况处理（TS + (Vue + <script setup>) or Svelte，esbuild无法进行解析import，这里的解决方案是强制加一条`import x `
           if (
             loader.startsWith('ts') &&
             (path.endsWith('.svelte') ||
@@ -266,6 +290,7 @@ function esbuildScanPlugin(
       // bare imports: record and externalize ----------------------------------
       build.onResolve(
         {
+          // WK 不匹配类似 base64这种的路径
           // avoid matching windows volume
           filter: /^[\w@][^:]/
         },
@@ -382,7 +407,7 @@ function esbuildScanPlugin(
     }
   }
 }
-
+// WK glob导入的模块的import语法的转换（https://cn.vitejs.dev/guide/features.html#glob-import）
 async function transformGlob(
   source: string,
   importer: string,
@@ -415,18 +440,27 @@ async function transformGlob(
   return s.toString()
 }
 
+/**
+ * // WK 是否把这个resolvedId 的external属性设为true
+ * @param resolvedId 
+ * @param rawId 
+ * @returns 
+ */
 export function shouldExternalizeDep(
   resolvedId: string,
   rawId: string
 ): boolean {
+  // WK 不是绝对路径设为true
   // not a valid file path
   if (!path.isAbsolute(resolvedId)) {
     return true
   }
+  // WK 虚拟resolvedId设为true
   // virtual id
   if (resolvedId === rawId || resolvedId.includes('\0')) {
     return true
   }
+  // WK 不是js且属于 html/vue/svelte设为true
   // resolved is not a scannable type
   if (!JS_TYPES_RE.test(resolvedId) && !htmlTypesRE.test(resolvedId)) {
     return true

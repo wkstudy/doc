@@ -1,28 +1,28 @@
-import fs from 'fs'
-import path from 'path'
-import chalk from 'chalk'
-import { createHash } from 'crypto'
-import { build, BuildOptions as EsbuildBuildOptions } from 'esbuild'
-import { ResolvedConfig } from '../config'
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import { createHash } from "crypto";
+import { build, BuildOptions as EsbuildBuildOptions } from "esbuild";
+import { ResolvedConfig } from "../config";
 import {
   createDebugger,
   emptyDir,
   lookupFile,
   normalizePath,
   writeFile,
-  flattenId
-} from '../utils'
-import { esbuildDepPlugin } from './esbuildDepPlugin'
-import { ImportSpecifier, init, parse } from 'es-module-lexer'
-import { scanImports } from './scan'
+  flattenId,
+} from "../utils";
+import { esbuildDepPlugin } from "./esbuildDepPlugin";
+import { ImportSpecifier, init, parse } from "es-module-lexer";
+import { scanImports } from "./scan";
 
-const debug = createDebugger('vite:deps')
+const debug = createDebugger("vite:deps");
 
 export type ExportsData = [ImportSpecifier[], string[]] & {
   // es-module-lexer has a facade detection but isn't always accurate for our
   // use case when the module has default export
-  hasReExports?: true
-}
+  hasReExports?: true;
+};
 
 export interface DepOptimizationOptions {
   /**
@@ -35,17 +35,17 @@ export interface DepOptimizationOptions {
    * (https://github.com/mrmlnc/fast-glob#basic-syntax) that are relative from
    * vite project root. This will overwrite default entries inference.
    */
-  entries?: string | string[]
+  entries?: string | string[];
   /**
    * Force optimize listed dependencies (must be resolvable import paths,
    * cannot be globs).
    */
-  include?: string[]
+  include?: string[];
   /**
    * Do not optimize these dependencies (must be resolvable import paths,
    * cannot be globs).
    */
-  exclude?: string[]
+  exclude?: string[];
   /**
    * Options to pass to esbuild during the dep scanning and optimization
    *
@@ -60,21 +60,21 @@ export interface DepOptimizationOptions {
    */
   esbuildOptions?: Omit<
     EsbuildBuildOptions,
-    | 'bundle'
-    | 'entryPoints'
-    | 'external'
-    | 'write'
-    | 'watch'
-    | 'outdir'
-    | 'outfile'
-    | 'outbase'
-    | 'outExtension'
-    | 'metafile'
-  >
+    | "bundle"
+    | "entryPoints"
+    | "external"
+    | "write"
+    | "watch"
+    | "outdir"
+    | "outfile"
+    | "outbase"
+    | "outExtension"
+    | "metafile"
+  >;
   /**
    * @deprecated use `esbuildOptions.keepNames`
    */
-  keepNames?: boolean
+  keepNames?: boolean;
 }
 
 export interface DepOptimizationMetadata {
@@ -82,21 +82,21 @@ export interface DepOptimizationMetadata {
    * The main hash is determined by user config and dependency lockfiles.
    * This is checked on server startup to avoid unnecessary re-bundles.
    */
-  hash: string
+  hash: string;
   /**
    * The browser hash is determined by the main hash plus additional dependencies
    * discovered at runtime. This is used to invalidate browser requests to
    * optimized deps.
    */
-  browserHash: string
+  browserHash: string;
   optimized: Record<
     string,
     {
-      file: string
-      src: string
-      needsInterop: boolean
+      file: string;
+      src: string;
+      needsInterop: boolean;
     }
-  >
+  >;
 }
 
 export async function optimizeDeps(
@@ -107,58 +107,60 @@ export async function optimizeDeps(
 ): Promise<DepOptimizationMetadata | null> {
   config = {
     ...config,
-    command: 'build'
-  }
+    command: "build",
+  };
 
-  const { root, logger, cacheDir } = config
-  const log = asCommand ? logger.info : debug
+  const { root, logger, cacheDir } = config;
+  const log = asCommand ? logger.info : debug;
 
   if (!cacheDir) {
-    log(`No cache directory. Skipping.`)
-    return null
+    log(`No cache directory. Skipping.`);
+    return null;
   }
 
-  const dataPath = path.join(cacheDir, '_metadata.json')
-  const mainHash = getDepHash(root, config)
+  const dataPath = path.join(cacheDir, "_metadata.json");
+  const mainHash = getDepHash(root, config);
+  // WK 初始化data并给data.hash赋值
   const data: DepOptimizationMetadata = {
     hash: mainHash,
     browserHash: mainHash,
-    optimized: {}
-  }
+    optimized: {},
+  };
 
   if (!force) {
-    let prevData
+    let prevData;
     try {
-      prevData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'))
+      prevData = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
     } catch (e) {}
     // hash is consistent, no need to re-bundle
     if (prevData && prevData.hash === data.hash) {
-      log('Hash is consistent. Skipping. Use --force to override.')
-      return prevData
+      log("Hash is consistent. Skipping. Use --force to override.");
+      return prevData;
     }
   }
 
   if (fs.existsSync(cacheDir)) {
-    emptyDir(cacheDir)
+    emptyDir(cacheDir);
   } else {
-    fs.mkdirSync(cacheDir, { recursive: true })
+    fs.mkdirSync(cacheDir, { recursive: true });
   }
 
-  let deps: Record<string, string>, missing: Record<string, string>
+  let deps: Record<string, string>, missing: Record<string, string>;
   if (!newDeps) {
-    ;({ deps, missing } = await scanImports(config))
+    ({ deps, missing } = await scanImports(config));
   } else {
-    deps = newDeps
-    missing = {}
+    deps = newDeps;
+    missing = {};
   }
 
+  // WK data.browserHash赋值
   // update browser hash
-  data.browserHash = createHash('sha256')
+  data.browserHash = createHash("sha256")
     .update(data.hash + JSON.stringify(deps))
-    .digest('hex')
-    .substr(0, 8)
+    .digest("hex")
+    .substr(0, 8);
 
-  const missingIds = Object.keys(missing)
+  const missingIds = Object.keys(missing);
   if (missingIds.length) {
     throw new Error(
       `The following dependencies are imported but could not be resolved:\n\n  ${missingIds
@@ -169,55 +171,56 @@ export async function optimizeDeps(
             )}`
         )
         .join(`\n  `)}\n\nAre they installed?`
-    )
+    );
   }
 
-  const include = config.optimizeDeps?.include
+  // WK 把include里的放进deps里
+  const include = config.optimizeDeps?.include;
   if (include) {
-    const resolve = config.createResolver({ asSrc: false })
+    const resolve = config.createResolver({ asSrc: false });
     for (const id of include) {
       if (!deps[id]) {
-        const entry = await resolve(id)
+        const entry = await resolve(id);
         if (entry) {
-          deps[id] = entry
+          deps[id] = entry;
         } else {
           throw new Error(
             `Failed to resolve force included dependency: ${chalk.cyan(id)}`
-          )
+          );
         }
       }
     }
   }
 
-  const qualifiedIds = Object.keys(deps)
+  const qualifiedIds = Object.keys(deps);
 
   if (!qualifiedIds.length) {
-    writeFile(dataPath, JSON.stringify(data, null, 2))
-    log(`No dependencies to bundle. Skipping.\n\n\n`)
-    return data
+    writeFile(dataPath, JSON.stringify(data, null, 2));
+    log(`No dependencies to bundle. Skipping.\n\n\n`);
+    return data;
   }
 
-  const total = qualifiedIds.length
-  const maxListed = 5
-  const listed = Math.min(total, maxListed)
-  const extra = Math.max(0, total - maxListed)
+  const total = qualifiedIds.length;
+  const maxListed = 5;
+  const listed = Math.min(total, maxListed);
+  const extra = Math.max(0, total - maxListed);
   const depsString = chalk.yellow(
     qualifiedIds.slice(0, listed).join(`\n  `) +
       (extra > 0 ? `\n  (...and ${extra} more)` : ``)
-  )
+  );
   if (!asCommand) {
     if (!newDeps) {
       // This is auto run on server start - let the user know that we are
       // pre-optimizing deps
       logger.info(
         chalk.greenBright(`Pre-bundling dependencies:\n  ${depsString}`)
-      )
+      );
       logger.info(
         `(this will be run only when your dependencies or config have changed)`
-      )
+      );
     }
   } else {
-    logger.info(chalk.greenBright(`Optimizing dependencies:\n  ${depsString}`))
+    logger.info(chalk.greenBright(`Optimizing dependencies:\n  ${depsString}`));
   }
 
   // esbuild generates nested directory output with lowest common ancestor base
@@ -226,87 +229,89 @@ export async function optimizeDeps(
   // 1. flatten all ids to eliminate slash
   // 2. in the plugin, read the entry ourselves as virtual files to retain the
   //    path.
-  const flatIdDeps: Record<string, string> = {}
-  const idToExports: Record<string, ExportsData> = {}
-  const flatIdToExports: Record<string, ExportsData> = {}
+  const flatIdDeps: Record<string, string> = {};
+  const idToExports: Record<string, ExportsData> = {};
+  const flatIdToExports: Record<string, ExportsData> = {};
 
-  await init
+  await init;
   for (const id in deps) {
-    const flatId = flattenId(id)
-    flatIdDeps[flatId] = deps[id]
-    const entryContent = fs.readFileSync(deps[id], 'utf-8')
-    const exportsData = parse(entryContent) as ExportsData
+    const flatId = flattenId(id);
+    flatIdDeps[flatId] = deps[id];
+    const entryContent = fs.readFileSync(deps[id], "utf-8");
+    const exportsData = parse(entryContent) as ExportsData;
     for (const { ss, se } of exportsData[0]) {
-      const exp = entryContent.slice(ss, se)
+      const exp = entryContent.slice(ss, se);
       if (/export\s+\*\s+from/.test(exp)) {
-        exportsData.hasReExports = true
+        exportsData.hasReExports = true;
       }
     }
-    idToExports[id] = exportsData
-    flatIdToExports[flatId] = exportsData
+    idToExports[id] = exportsData;
+    flatIdToExports[flatId] = exportsData;
   }
 
   const define: Record<string, string> = {
-    'process.env.NODE_ENV': JSON.stringify(config.mode)
-  }
+    "process.env.NODE_ENV": JSON.stringify(config.mode),
+  };
   for (const key in config.define) {
-    const value = config.define[key]
-    define[key] = typeof value === 'string' ? value : JSON.stringify(value)
+    const value = config.define[key];
+    define[key] = typeof value === "string" ? value : JSON.stringify(value);
   }
 
-  const start = Date.now()
+  const start = Date.now();
 
   const { plugins = [], ...esbuildOptions } =
-    config.optimizeDeps?.esbuildOptions ?? {}
+    config.optimizeDeps?.esbuildOptions ?? {};
 
+  // WK 依据deps missing进行打包
   const result = await build({
     entryPoints: Object.keys(flatIdDeps),
     bundle: true,
-    format: 'esm',
+    format: "esm",
     external: config.optimizeDeps?.exclude,
-    logLevel: 'error',
+    logLevel: "error",
     splitting: true,
     sourcemap: true,
     outdir: cacheDir,
-    treeShaking: 'ignore-annotations',
+    treeShaking: "ignore-annotations",
     metafile: true,
     define,
     plugins: [
       ...plugins,
-      esbuildDepPlugin(flatIdDeps, flatIdToExports, config)
+      esbuildDepPlugin(flatIdDeps, flatIdToExports, config),
     ],
-    ...esbuildOptions
-  })
+    ...esbuildOptions,
+  });
 
-  const meta = result.metafile!
+  const meta = result.metafile!;
 
   // the paths in `meta.outputs` are relative to `process.cwd()`
-  const cacheDirOutputPath = path.relative(process.cwd(), cacheDir)
+  const cacheDirOutputPath = path.relative(process.cwd(), cacheDir);
 
+  // WK data.optimized给值，此时_metadata.json已经完成了
   for (const id in deps) {
-    const entry = deps[id]
+    const entry = deps[id];
     data.optimized[id] = {
-      file: normalizePath(path.resolve(cacheDir, flattenId(id) + '.js')),
+      file: normalizePath(path.resolve(cacheDir, flattenId(id) + ".js")),
       src: entry,
       needsInterop: needsInterop(
         id,
         idToExports[id],
         meta.outputs,
         cacheDirOutputPath
-      )
-    }
+      ),
+    };
   }
 
-  writeFile(dataPath, JSON.stringify(data, null, 2))
+  writeFile(dataPath, JSON.stringify(data, null, 2));
 
-  debug(`deps bundled in ${Date.now() - start}ms`)
-  return data
+  debug(`deps bundled in ${Date.now() - start}ms`);
+  return data;
 }
 
 // https://github.com/vitejs/vite/issues/1724#issuecomment-767619642
 // a list of modules that pretends to be ESM but still uses `require`.
 // this causes esbuild to wrap them as CJS even when its entry appears to be ESM.
-const KNOWN_INTEROP_IDS = new Set(['moment'])
+const KNOWN_INTEROP_IDS = new Set(["moment"]);
 
 function needsInterop(
   id: string,
@@ -315,26 +320,26 @@ function needsInterop(
   cacheDirOutputPath: string
 ): boolean {
   if (KNOWN_INTEROP_IDS.has(id)) {
-    return true
+    return true;
   }
-  const [imports, exports] = exportsData
+  const [imports, exports] = exportsData;
   // entry has no ESM syntax - likely CJS or UMD
   if (!exports.length && !imports.length) {
-    return true
+    return true;
   }
 
   // if a peer dependency used require() on a ESM dependency, esbuild turns the
   // ESM dependency's entry chunk into a single default export... detect
   // such cases by checking exports mismatch, and force interop.
-  const flatId = flattenId(id) + '.js'
-  let generatedExports: string[] | undefined
+  const flatId = flattenId(id) + ".js";
+  let generatedExports: string[] | undefined;
   for (const output in outputs) {
     if (
       normalizePath(output) ===
       normalizePath(path.join(cacheDirOutputPath, flatId))
     ) {
-      generatedExports = outputs[output].exports
-      break
+      generatedExports = outputs[output].exports;
+      break;
     }
   }
 
@@ -342,24 +347,31 @@ function needsInterop(
     !generatedExports ||
     (isSingleDefaultExport(generatedExports) && !isSingleDefaultExport(exports))
   ) {
-    return true
+    return true;
   }
-  return false
+  return false;
 }
 
 function isSingleDefaultExport(exports: string[]) {
-  return exports.length === 1 && exports[0] === 'default'
+  return exports.length === 1 && exports[0] === "default";
 }
 
-const lockfileFormats = ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml']
+const lockfileFormats = ["package-lock.json", "yarn.lock", "pnpm-lock.yaml"];
 
-let cachedHash: string | undefined
+let cachedHash: string | undefined;
 
+/**
+ * // WK 结合package.lock.json和config的一些配置生成一个hash
+ * // WK 即/node_modules/.vite 下的_metadata.json里的hash的生成
+ * @param root
+ * @param config
+ * @returns hash
+ */
 function getDepHash(root: string, config: ResolvedConfig): string {
   if (cachedHash) {
-    return cachedHash
+    return cachedHash;
   }
-  let content = lookupFile(root, lockfileFormats) || ''
+  let content = lookupFile(root, lockfileFormats) || "";
   // also take config into account
   // only a subset of config options that can affect dep optimization
   content += JSON.stringify(
@@ -371,15 +383,15 @@ function getDepHash(root: string, config: ResolvedConfig): string {
       plugins: config.plugins.map((p) => p.name),
       optimizeDeps: {
         include: config.optimizeDeps?.include,
-        exclude: config.optimizeDeps?.exclude
-      }
+        exclude: config.optimizeDeps?.exclude,
+      },
     },
     (_, value) => {
-      if (typeof value === 'function' || value instanceof RegExp) {
-        return value.toString()
+      if (typeof value === "function" || value instanceof RegExp) {
+        return value.toString();
       }
-      return value
+      return value;
     }
-  )
-  return createHash('sha256').update(content).digest('hex').substr(0, 8)
+  );
+  return createHash("sha256").update(content).digest("hex").substr(0, 8);
 }

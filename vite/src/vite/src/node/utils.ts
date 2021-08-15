@@ -101,7 +101,7 @@ export const hashRE = /#.*$/;
 export const cleanUrl = (url: string): string =>
   url.replace(hashRE, "").replace(queryRE, "");
 
-export const externalRE = /^(https?:)?\/\//;
+export const externalRE = /^(https?:)?\/\//; // WK  http:// ｜ https:// | //
 export const isExternalUrl = (url: string): boolean => externalRE.test(url);
 
 export const dataUrlRE = /^\s*data:/i;
@@ -211,6 +211,13 @@ export function isDefined<T>(value: T | undefined | null): value is T {
   return value !== undefined && value !== null;
 }
 
+/**
+ * // WK  返回dir下第一个formats里的文件的路径或者内容(优先返回formats里存在且是文件的那个文件)
+ * @param dir 
+ * @param formats 
+ * @param pathOnly 
+ * @returns 
+ */
 export function lookupFile(
   dir: string,
   formats: string[],
