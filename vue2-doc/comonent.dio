@@ -1,0 +1,80 @@
+<mxfile host="65bd71144e">
+    <diagram id="dPATNF6aiVXJDb3Ovyef" name="第 1 页">
+        <mxGraphModel dx="1354" dy="2667" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="3" value="组件化" style="text;strokeColor=none;fillColor=none;html=1;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;fontFamily=Times New Roman;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="-540" y="-2034" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-492.5" y="-1880" as="targetPoint"/>
+                        <mxPoint x="-492.5" y="-1910" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="47" value="1. ..." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-520" y="-1945" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" edge="1" parent="1" source="49">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-492" y="-1810" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="49" value="2.vm._update(vm._render(),&amp;nbsp;hydrating);" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-650" y="-1870" width="315" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" edge="1" parent="1" source="51">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-497" y="-1730" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="73" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;labelBorderColor=#000000;strokeColor=#080808;fontSize=14;" edge="1" parent="1" source="51">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-200" y="-1890" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="51" value="3._createElement()" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-572.5" y="-1810" width="150" height="33" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" edge="1" parent="1" source="61">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-492" y="-1650" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="61" value="4.&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;vm&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;$el&lt;/span&gt;&amp;nbsp;=&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;vm&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;__patch__&lt;/span&gt;(&lt;span style=&quot;font-size: 14px;&quot;&gt;vm&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;$el&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;vnode&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;hydrating&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;false&lt;/span&gt;);" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-697.5" y="-1730" width="410" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" style="edgeStyle=none;html=1;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" edge="1" parent="1" source="64" target="66">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-480" y="-1530" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="64" value="5.&amp;nbsp;createElm(vnode,&amp;nbsp;insertedVnodeQueue,&lt;span style=&quot;font-size: 14px;&quot;&gt;oldElm&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;_leaveCb&lt;/span&gt;&amp;nbsp;?&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;null&lt;/span&gt;&amp;nbsp;:&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;parentElm&lt;/span&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;,&lt;/font&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;nodeOps&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;nextSibling&lt;/span&gt;(&lt;span style=&quot;font-size: 14px;&quot;&gt;oldElm&lt;/span&gt;))" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-520" y="-1650" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" value="&lt;span style=&quot;font-size: 14px; font-style: normal; font-weight: 400; letter-spacing: normal; text-align: center; text-indent: 0px; text-transform: none; word-spacing: 0px; display: inline; float: none; background-color: rgb(255, 255, 255);&quot;&gt;6....&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-520" y="-1590" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="71" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontFamily=Times New Roman;fontColor=#000000;strokeColor=#000000;fontSize=14;" edge="1" parent="1" source="69" target="61">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="74" value="vnode" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-200" y="-1730" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="69" value="" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontColor=#000000;fillColor=none;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-199" y="-2045" width="429" height="292" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;3.1 Ctor&lt;/span&gt;&amp;nbsp;=&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;baseCtor&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;extend&lt;/span&gt;(&lt;span style=&quot;font-size: 14px;&quot;&gt;Ctor&lt;/span&gt;);" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-238" y="-2027" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="3.2 installComponentHooks(data);" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-196" y="-1990" width="300" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;3.3&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;const&lt;/span&gt;&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;vnode&lt;/span&gt;&amp;nbsp;=&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;new&lt;/span&gt;&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;VNode&lt;/span&gt;(&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;`vue-component-&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;${&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;Ctor&lt;/span&gt;.&lt;span style=&quot;font-size: 14px;&quot;&gt;cid&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;}${&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;name&lt;/span&gt;&amp;nbsp;?&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;`-&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;${&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;name&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;}&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;`&lt;/span&gt;&amp;nbsp;:&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;}&lt;/span&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;`&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;data&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;undefined&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;undefined&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;undefined&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;context&lt;/span&gt;,&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;{&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;Ctor&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;propsData&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;listeners&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;tag&lt;/span&gt;,&amp;nbsp;&lt;span style=&quot;font-size: 14px;&quot;&gt;children&lt;/span&gt;&amp;nbsp;},&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;asyncFactory&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left; font-size: 14px;&quot;&gt;)&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Times New Roman;fontColor=#000000;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="-181" y="-1947" width="400" height="170" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
