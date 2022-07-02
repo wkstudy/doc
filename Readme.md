@@ -8,3 +8,4 @@
 - [x] vite
 - [x] qiankun、single-spa
 - [x] [vue-router](https://github.com/wkstudy/vue-router/tree/comment-wk)
+- [x] [vuex3](https://github.com/wkstudy/vuex/tree/comment-wk)
