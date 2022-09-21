@@ -36,3 +36,5 @@ addImport()
 addExport()
 ```
 4. `fetchAllDependencies`将module依赖的模块挨个进行`fetchModule`，循环以上步骤，将所有module都进行了解析并记录下来了，到此为止所有需要的文件（module）就都记录下来了，接下来就是一些细节的完善（比如进行tree shaking 、防止模块明明重复）等等，
+
+generate()/write()方法就是把bundle进行打包
