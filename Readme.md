@@ -8,6 +8,6 @@
 - [x] vite 
 - [x] vite-v1branch
 - [x] qiankun、single-spa
-- [x] [vue-router](https://github.com/wkstudy/vue-router/tree/comment-wk)
-- [x] [vuex3](https://github.com/wkstudy/vuex/tree/comment-wk)
+- [x] [vue-router，分支comment-wk](https://github.com/wkstudy/vue-router/blob/comment-wk/comment.md)
+- [x] [vuex3,分支comment-wk](https://github.com/wkstudy/vuex/blob/comment-wk/comment.md)
 - [x] rollup
