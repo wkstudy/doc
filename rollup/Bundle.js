@@ -98,8 +98,11 @@ export default class Bundle {
 
         // Phase 2 – binding. We link references to their declarations
         // to generate a complete picture of the bundle
+        // wk step1  模块之间的依赖关系确立 ，用的是dependencies记录  ————module级别之间的关系
         this.modules.forEach((module) => module.bindImportSpecifiers());
+
         this.modules.forEach((module) => module.bindAliases());
+        // wk step3 ？把变量使用的地方(某个statement的node节点)和变量定义的地方(某个module的某个declaration)做了一个关联(reference) ————变量级别之间的关联
         this.modules.forEach((module) => module.bindReferences());
 
         // Phase 3 – marking. We 'run' each statement to see which ones
@@ -110,6 +113,7 @@ export default class Bundle {
           const declaration = entryModule.traceExport(name);
           declaration.exportName = name;
 
+          // wk export的东西都是used
           declaration.use();
         });
 

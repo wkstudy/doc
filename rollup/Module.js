@@ -28,7 +28,7 @@ export default class Module {
     this.excludeFromSourcemap = /\0/.test(id);
 
     // all dependencies
-    this.sources = []; // wk 存的都是import export语句
+    this.sources = []; // wk 存的都是import export语句的路径eg import a from './lib/a.js' export {b} from './lib/b.js' ['./lib/a.js', './lib/b.js']
     this.dependencies = []; // wk 存每个sources对应的module
     this.resolvedIds = resolvedIds || blank();
 
@@ -38,7 +38,7 @@ export default class Module {
     this.exportsAll = blank();
     this.reexports = blank();
 
-    this.exportAllSources = [];
+    this.exportAllSources = []; // wk `export * from './lib/a.js'` 这种的路径 ['./lib/a.js']
     this.exportAllModules = null;
 
     // By default, `id` is the filename. Custom resolvers and loaders
@@ -60,7 +60,7 @@ export default class Module {
     // wk ast解析
     this.statements = this.parse();
 
-    this.declarations = blank();
+    this.declarations = blank(); // wk 存的声明的变量
     this.analyse();
 
     this.strongDependencies = [];
@@ -222,6 +222,7 @@ export default class Module {
     });
   }
 
+  // wk 模块之间的依赖关系确立 ，用的是dependencies记录  ————module级别之间的关系
   bindImportSpecifiers() {
     [this.imports, this.reexports].forEach((specifiers) => {
       keys(specifiers).forEach((name) => {
@@ -246,11 +247,13 @@ export default class Module {
     this.sources.forEach((source) => {
       const id = this.resolvedIds[source];
       const module = this.bundle.moduleById.get(id);
-
+      // wk 把依赖的module记录下来，放到dependencies里
       if (!module.isExternal) this.dependencies.push(module);
     });
   }
 
+  // wk 应该是 确定当前module的每个变量是从哪个ast拿来的，并利用references下来, ———— 两个变量级别之间的关系
+  // wk eg  a.js中有 getName()，就找到getName()是从b.js里定义的，把这两处的代码关联起来
   bindReferences() {
     if (this.declarations.default) {
       if (this.exports.default.identifier) {
@@ -279,6 +282,7 @@ export default class Module {
     });
   }
 
+  // wk 只取export 不管import
   getExports() {
     const exports = blank();
 
@@ -689,6 +693,7 @@ export default class Module {
   }
 
   trace(name) {
+    // wk 找name是从哪个module的哪个declarations里拿出来的
     if (name in this.declarations) return this.declarations[name];
     if (name in this.imports) {
       const importDeclaration = this.imports[name];

@@ -38,3 +38,16 @@ addExport()
 4. `fetchAllDependencies`将module依赖的模块挨个进行`fetchModule`，循环以上步骤，将所有module都进行了解析并记录下来了，到此为止所有需要的文件（module）就都记录下来了，接下来就是一些细节的完善（比如进行tree shaking 、防止模块明明重复）等等，
 
 generate()/write()方法就是把bundle进行打包
+
+### v2
+要做一次rollup构建流程的分享，再次看了看代码，有了些新的认识
+《从一个字符串到静态资源的过程》
+string   'src/main.js'
+ID "/Users/sftc/test/myrollup/src/main.js"
+js对象 module = new Module()
+根据ast分析的结果递归的找到所有的文件
+[module1, module2]
+
+第二阶段：module之间建立链接
+1. 作用：完善模块之间的依赖关系，之前只是根据import  export * from 'xx.js'找的，依赖关系不够
+2. 也是做tree shaking的基础
