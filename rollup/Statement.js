@@ -37,7 +37,7 @@ export default class Statement {
 
 		// attach scopes
 		attachScopes( this );
-
+		// wk 找reference,这是后续进行 bindAlias 和bindReferences的基础
 		// find references
 		const statement = this;
 		let { module, references, scope, stringLiteralRanges } = this;
@@ -98,7 +98,8 @@ export default class Statement {
 						isReassignment = !depth;
 					}
 				}
-				// wk ？ isReference 没看懂，大意应该是指这个node是否是从其他地方定义的？
+				// wk isReference 没看懂，大意应该是指这个node是否是从其他地方定义的
+				// wk  如果是的话就建一条 reference
 				if ( isReference( node, parent ) ) {
 					// function declaration IDs are a special case – they're associated
 					// with the parent scope
@@ -133,8 +134,10 @@ export default class Statement {
 
 	mark () {
 		if ( this.isIncluded ) return; // prevent infinite loops
+		// wk 这个statement的isIncluded 设为true
 		this.isIncluded = true;
 
+		// wk 这个statement使用的相关变量定义的地方也要执行declaration.use()
 		this.references.forEach( reference => {
 			if ( reference.declaration ) reference.declaration.use();
 		});
@@ -144,7 +147,9 @@ export default class Statement {
 		if ( ( this.ran && this.isIncluded ) || this.isImportDeclaration || this.isFunctionDeclaration ) return;
 		this.ran = true;
 
+		// wk 此处的run函数就是判断下该statement是否会产生“副作用”，如果不会的话返回true
 		if ( run( this.node, this.scope, this, strongDependencies, false ) ) {
+			// wk 如果会产生副作用的话就把这个statement mark一下(记录isIncluded = true,也就是必须要打包)
 			this.mark();
 			return true;
 		}

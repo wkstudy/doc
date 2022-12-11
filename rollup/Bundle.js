@@ -99,24 +99,52 @@ export default class Bundle {
         // Phase 2 – binding. We link references to their declarations
         // to generate a complete picture of the bundle
         // wk step1  模块之间的依赖关系确立 ，用的是dependencies记录  ————module级别之间的关系
+        // eg: // 在模块a里有：import x from './c';
+        // 结果： moduleA.dependencies = [moduleC]
         this.modules.forEach((module) => module.bindImportSpecifiers());
-
+        // wk  step2 把模块里或模块之间的变量引用之间的关系记录下来，用的是alias记录  —————变量级别之间的关联 （declaration）
+        // eg : let a = b + c
+        // 结果：  declarationsB.alias = [declarationsA];  declarationsC.alias = [declarationsA]
         this.modules.forEach((module) => module.bindAliases());
-        // wk step3 ？把变量使用的地方(某个statement的node节点)和变量定义的地方(某个module的某个declaration)做了一个关联(reference) ————变量级别之间的关联
+
+        // wk step3 把变量使用的地方(某个statement的node节点)和变量定义的地方(某个module的某个declaration)做了一个关联(reference) ————变量级别之间的关联(statement)
+        // eg: let a=b+c
+        //  这条statement.references = [
+        //   referenceA: { // 自己
+        //     declaration: '自己'
+        //   },
+        //   referenceB: { 
+        //     declaration: '文件b里的语句：export const b  = 2'
+        //   },
+        //   referenceC: {
+        //     declaration: '文件c里的语句：export const c = 3'
+        //   }
+        // ]
+        // 结果可以看截图 bindReferences.png
+        // 这样就把let a=b+c 这个statement和b c定义的语句关联起来了
         this.modules.forEach((module) => module.bindReferences());
+
+        
 
         // Phase 3 – marking. We 'run' each statement to see which ones
         // need to be included in the generated bundle
+        // wk 以下我看的是主要处理了两种情况(变量声明和一般语句)
+        // wk 情况1 ： declaration用到的话 declaration.isUsed = true
+        // wk 情况2： statement用到的话 statement.isIncluded = true
 
         // mark all export statements
+        // wk 导出的东西肯定是要用到的
         entryModule.getExports().forEach((name) => {
           const declaration = entryModule.traceExport(name);
           declaration.exportName = name;
 
           // wk export的东西都是used
+          //  wk 此处不仅要把该变量used，还要把用这个变量的变量给used（这个能力是上面bindAliases()提供的）
+          // wk declaration如果用到的话都加一个标记 declaration.isUsed
           declaration.use();
         });
 
+        // 
         // mark statements that should appear in the bundle
         let settled = false;
         while (!settled) {

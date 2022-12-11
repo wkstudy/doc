@@ -60,7 +60,7 @@ export default class Module {
     // wk ast解析
     this.statements = this.parse();
 
-    this.declarations = blank(); // wk 存的声明的变量
+    this.declarations = blank(); // wk 该模块存的声明的变量
     this.analyse();
 
     this.strongDependencies = [];
@@ -113,6 +113,7 @@ export default class Module {
       };
 
       // create a synthetic declaration
+      // wk 记录模块export的变量
       this.declarations.default = new SyntheticDefaultDeclaration(node, statement, identifier || this.basename());
     }
 
@@ -175,6 +176,7 @@ export default class Module {
       const isNamespace = specifier.type === "ImportNamespaceSpecifier";
 
       const name = isDefault ? "default" : isNamespace ? "*" : specifier.imported.name;
+      // wk 此时只是初始化this.imports[localName],具体内容（来自哪个module）有待后续解决
       this.imports[localName] = { source, name, module: null };
     });
   }
@@ -182,12 +184,14 @@ export default class Module {
   analyse() {
     // discover this module's imports and exports
     this.statements.forEach((statement) => {
-      // wk import  export 语句单独记录
+      // wk import  export 语句单独记录 
       if (statement.isImportDeclaration) this.addImport(statement);
       else if (statement.isExportDeclaration) this.addExport(statement);
-
+      // wk 重要  找reference ,便于后续 bindAlias 和 bindReference
       statement.firstPass();
 
+      // wk 这条statement里如果也是变量声明的话就记录下来
+      // eg const a = b + c;  就记一个this.declarations[c] = 这条语句
       statement.scope.eachDeclaration((name, declaration) => {
         this.declarations[name] = declaration;
       });
@@ -201,17 +205,28 @@ export default class Module {
     return makeLegalIdentifier(ext ? base.slice(0, -ext.length) : base);
   }
 
+  // wk 这里我理解是有引用关系的两个语句会记录其依赖关系，通过declaration的alias来记录   ———— 语句级别之间的关系（这里只处理变量（存在declarations里）引用之间的关系）
   bindAliases() {
+    // wk declarations记录的是模块中的所有变量
     keys(this.declarations).forEach((name) => {
       if (name === "*") return;
 
       const declaration = this.declarations[name];
+      // statement是变量定义的那条语句
       const statement = declaration.statement;
 
       if (!statement || statement.node.type !== "VariableDeclaration") return;
 
       const init = statement.node.declarations[0].init;
       if (!init || init.type === "FunctionExpression") return;
+
+      // wk 关于references
+      // eg: let a = 2; 这条declaration里的references会记录一条数据，就是其本身
+      // let a = b + c,这条declaration里的references会有三条['本身'，'b', 'c'],
+      //   下面的运行结果就是分别找到b 和c 变量声明的declaration(暂且记为declarationB declarationC)，
+      //    记录a的declaration（暂且记为declarationA）和这两个之间的联系
+      // declarationB['aliases'] = [decalarationA]
+      // declarationC['aliases'] = [decalarationA]
 
       statement.references.forEach((reference) => {
         if (reference.name === name) return;
@@ -316,6 +331,7 @@ export default class Module {
     if (!this.ast) {
       // Try to extract a list of top-level statements/declarations. If
       // the parse fails, attach file info and abort
+      // wk 这里记录的是模块top-level最外层的declaration（变量声明）和statements(语句)
       try {
         this.ast = parse(
           this.code,
@@ -339,9 +355,10 @@ export default class Module {
 
     walk(this.ast, {
       enter: (node) => {
+        // wk 此处是在ast解析的过程中就完成了
         // eliminate dead branches early
         if (node.type === "IfStatement") {
-          // wk 进行treeshaking
+          // wk 进行treeshaking 场景： if(false) {}
           if (isFalsy(node.test)) {
             this.magicString.overwrite(node.consequent.start, node.consequent.end, "{}");
             node.consequent = emptyBlockStatement(node.consequent.start, node.consequent.end);
@@ -466,6 +483,7 @@ export default class Module {
     const magicString = this.magicString;
 
     this.statements.forEach((statement) => {
+      // wk 使用statement.isIncluded去掉无效代码
       if (!statement.isIncluded) {
         if (statement.node.type === "ImportDeclaration") {
           magicString.remove(statement.node.start, statement.next);
@@ -621,6 +639,7 @@ export default class Module {
           const defaultName = defaultDeclaration.render();
 
           // prevent `var undefined = sideEffectyDefault(foo)`
+          // wk 使用到declaration.isUsed 去除无用代码
           if (!defaultDeclaration.exportName && !defaultDeclaration.isUsed) {
             magicString.remove(statement.start, statement.node.declaration.start);
             return;
@@ -664,6 +683,7 @@ export default class Module {
    */
   run(treeshake) {
     if (!treeshake) {
+      // wk 如果不想treeshake，说明所有的语句都要保留，那么就直接执行statement.mark()(也就是每个statement.isIncluded都为true)
       this.statements.forEach((statement) => {
         if (statement.isImportDeclaration || (statement.isExportDeclaration && statement.node.isSynthetic)) return;
 
